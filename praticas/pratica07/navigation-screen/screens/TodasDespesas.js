@@ -1,22 +1,16 @@
 import { useState, useMemo } from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  useColorScheme,
-} from 'react-native';
+import { View, TextInput, StyleSheet } from 'react-native';
 import DespesaSaida from '../components/despesa/DespesaSaida';
 import { useExpenses } from '../store/expenses-context';
 import { useDebounce } from '../hooks/useDebounce';
-import { themes } from '../constants/theme';
+import { useAppTheme } from '../store/theme-context';
 
 function TodasDespesas() {
   const { expenses } = useExpenses();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 400);
 
-  const scheme = useColorScheme();
-  const colors = themes[scheme === 'dark' ? 'dark' : 'light'];
+  const { colors } = useAppTheme();
 
   const filtered = useMemo(() => {
     const term = debouncedQuery.trim().toLowerCase();

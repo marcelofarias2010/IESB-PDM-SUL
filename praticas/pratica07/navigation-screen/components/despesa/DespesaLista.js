@@ -1,16 +1,19 @@
 import { FlatList, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DespesaItem from './DespesaItem';
+import { useAppTheme } from '../../store/theme-context';
 
 /**
  * Mensagem exibida quando a lista não tem itens.
  */
 function EmptyList() {
+  const { colors } = useAppTheme();
+
   return (
     <View style={styles.empty}>
-      <Ionicons name="receipt-outline" size={48} color="#888" />
-      <Text style={styles.emptyTitle}>Nenhuma despesa por aqui</Text>
-      <Text style={styles.emptyHint}>Toque em + para adicionar a primeira</Text>
+      <Ionicons name="receipt-outline" size={48} color={colors.primary} />
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma despesa por aqui</Text>
+      <Text style={[styles.emptyHint, { color: colors.text }]}>Toque em + para adicionar a primeira</Text>
     </View>
   );
 }

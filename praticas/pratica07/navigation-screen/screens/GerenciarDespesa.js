@@ -14,6 +14,7 @@ import {
 import { useState, useLayoutEffect, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useExpenses } from '../store/expenses-context';
+import { useAppTheme } from '../store/theme-context';
 
 const CATEGORIES = ['Alimentação', 'Transporte', 'Material', 'Outros'];
 
@@ -44,6 +45,7 @@ function GerenciarDespesas({ route, navigation }) {
   const expenseId = route.params?.expenseId;
   const isEditing = !!expenseId;
   const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses();
+  const { colors } = useAppTheme();
   const selected = expenses.find((e) => e.id === expenseId);
 
   const [form, setForm] = useState({
@@ -161,7 +163,7 @@ function GerenciarDespesas({ route, navigation }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -169,9 +171,9 @@ function GerenciarDespesas({ route, navigation }) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Descrição</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Descrição</Text>
           <TextInput
-            style={[styles.input, errors.description && styles.inputError]}
+            style={[styles.input, { backgroundColor: colors.input, borderColor: colors.border, color: colors.text }, errors.description && styles.inputError]}
             maxLength={40}
             value={form.description}
             onChangeText={(text) => handleChange('description', text)}
@@ -182,9 +184,9 @@ function GerenciarDespesas({ route, navigation }) {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Valor (R$)</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Valor (R$)</Text>
           <TextInput
-            style={[styles.input, errors.amount && styles.inputError]}
+            style={[styles.input, { backgroundColor: colors.input, borderColor: colors.border, color: colors.text }, errors.amount && styles.inputError]}
             keyboardType="decimal-pad"
             maxLength={10}
             value={form.amount}
@@ -196,12 +198,12 @@ function GerenciarDespesas({ route, navigation }) {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Data</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Data</Text>
           <Pressable
             onPress={() => setShowPicker(true)}
-            style={[styles.input, errors.date && styles.inputError]}
+            style={[styles.input, { backgroundColor: colors.input, borderColor: colors.border }, errors.date && styles.inputError]}
           >
-            <Text>{form.date.toLocaleDateString('pt-BR')}</Text>
+            <Text style={{ color: colors.text }}>{form.date.toLocaleDateString('pt-BR')}</Text>
           </Pressable>
           {!!errors.date && (
             <Text style={styles.errorText}>{errors.date}</Text>
@@ -218,12 +220,12 @@ function GerenciarDespesas({ route, navigation }) {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Categoria</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Categoria</Text>
           <Pressable
             onPress={() => setIsPickerOpen(true)}
-            style={[styles.input, errors.category && styles.inputError]}
+            style={[styles.input, { backgroundColor: colors.input, borderColor: colors.border }, errors.category && styles.inputError]}
           >
-            <Text>{form.category || 'Escolha a categoria'}</Text>
+            <Text style={{ color: colors.text }}>{form.category || 'Escolha a categoria'}</Text>
           </Pressable>
           {!!errors.category && (
             <Text style={styles.errorText}>{errors.category}</Text>
@@ -251,14 +253,14 @@ function GerenciarDespesas({ route, navigation }) {
         onRequestClose={() => setIsPickerOpen(false)}
       >
         <View style={styles.backdrop}>
-          <View style={styles.sheet}>
+          <View style={[styles.sheet, { backgroundColor: colors.input }]}>
             {CATEGORIES.map((category) => (
               <Pressable
                 key={category}
                 onPress={() => selectCategory(category)}
                 style={styles.option}
               >
-                <Text style={styles.optionText}>{category}</Text>
+                <Text style={[styles.optionText, { color: colors.text }]}>{category}</Text>
               </Pressable>
             ))}
           </View>

@@ -1,5 +1,6 @@
 import { Text, View, Pressable, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAppTheme } from '../../store/theme-context';
 
 /**
  * Formata a data para dia/mês/ano.
@@ -15,6 +16,7 @@ function getDataFormatada(data) {
 
 function DespesaItem({ item }) {
   const navigation = useNavigation();
+  const { colors } = useAppTheme();
 
   /**
    * Abre a tela de edição desta despesa.
@@ -25,18 +27,18 @@ function DespesaItem({ item }) {
 
   return (
     <Pressable onPress={handlePress}>
-      <View style={styles.itemContainer}>
+      <View style={[styles.itemContainer, { backgroundColor: colors.card }]}>
         <View style={styles.itemText}>
-          <Text>{getDataFormatada(item.date)}</Text>
+          <Text style={{ color: colors.text }}>{getDataFormatada(item.date)}</Text>
         </View>
         <View style={styles.itemText}>
-          <Text>{item.description}</Text>
+          <Text style={{ color: colors.text }}>{item.description}</Text>
           {!!item.category && (
-            <Text style={styles.category}>{item.category}</Text>
+            <Text style={[styles.category, { color: colors.primary }]}>{item.category}</Text>
           )}
         </View>
         <View style={styles.itemValor}>
-          <Text>R$ {Number(item.amount).toFixed(2)}</Text>
+          <Text style={{ color: colors.text }}>R$ {Number(item.amount).toFixed(2)}</Text>
         </View>
       </View>
     </Pressable>

@@ -1,6 +1,8 @@
 import { Text, View, StyleSheet, useWindowDimensions } from 'react-native';
+import { useAppTheme } from '../../store/theme-context';
 
 function DespesaSumario({ despesas, periodo }) {
+  const { colors } = useAppTheme();
   const { width } = useWindowDimensions();
   const isTablet = width >= 600;
 
@@ -11,16 +13,16 @@ function DespesaSumario({ despesas, periodo }) {
   const quantidade = despesas.length;
 
   return (
-    <View style={[styles.container, isTablet && styles.wide]}>
+    <View style={[styles.container, isTablet && styles.wide, { backgroundColor: colors.summary }]}>
       <View>
-        <Text style={[styles.texto, isTablet && styles.textoLarge]}>
+        <Text style={[styles.texto, isTablet && styles.textoLarge, { color: colors.text }]}>
           {periodo}
         </Text>
-        <Text style={styles.quantidade}>
+        <Text style={[styles.quantidade, { color: colors.text }]}>
           {quantidade} {quantidade === 1 ? 'despesa' : 'despesas'}
         </Text>
       </View>
-      <Text style={[styles.texto, isTablet && styles.textoLarge]}>
+      <Text style={[styles.texto, isTablet && styles.textoLarge, { color: colors.text }]}>
         R$ {somaDespesas.toFixed(2)}
       </Text>
     </View>

@@ -1,31 +1,56 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import DespesasRecentes from './screens/DespesasRecentes';
 import GerenciarDespesas from './screens/GerenciarDespesa';
 import TodasDespesas from './screens/TodasDespesas';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import IconButton from './components/IconButton';
 import { useNavigation } from '@react-navigation/native';
 import { ExpensesContextProvider } from './store/expenses-context';
+import { ThemeProvider, useAppTheme } from './store/theme-context';
 
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <ExpensesContextProvider>
+        <RootNavigation />
+      </ExpensesContextProvider>
+    </ThemeProvider>
+  );
+}
+
+function RootNavigation() {
+  const { mode, colors } = useAppTheme();
+  const navigationTheme = mode === 'dark' ? DarkTheme : DefaultTheme;
   const Tab = createBottomTabNavigator();
 
   function BottomTabScreen() {
     const navigation = useNavigation();
+    const { mode: themeMode, colors: themeColors, toggleTheme } = useAppTheme();
 
     return (
       <Tab.Navigator
-        screenOptions={({
-          headerRight: () => <IconButton icon="add"
-            size={24}
-            onPress={() => {
-              navigation.navigate('GerenciarDespesa')
-            }} />
-        })}
+        screenOptions={{
+          headerRight: () => (
+            <View style={styles.headerActions}>
+              <IconButton
+                icon={themeMode === 'dark' ? 'sunny' : 'moon'}
+                size={22}
+                color={themeColors.text}
+                onPress={toggleTheme}
+              />
+              <IconButton
+                icon="add"
+                size={24}
+                color={themeColors.text}
+                onPress={() => navigation.navigate('GerenciarDespesa')}
+              />
+            </View>
+          ),
+        }}
       >
         <Tab.Screen name='DespesasRecentes' component={DespesasRecentes}
           options={{
@@ -50,23 +75,30 @@ export default function App() {
 
   const Stack = createNativeStackNavigator();
   return (
-    <ExpensesContextProvider>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name='Despesas' component={BottomTabScreen} options={{ headerShown: false }} />
-          <Stack.Screen name='GerenciarDespesa' component={GerenciarDespesas} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </ExpensesContextProvider>
-  )
-
+    <NavigationContainer
+      theme={{
+        ...navigationTheme,
+        colors: {
+          ...navigationTheme.colors,
+          background: colors.background,
+          card: colors.input,
+          text: colors.text,
+          primary: colors.primary,
+          border: colors.border,
+        },
+      }}
+    >
+      <Stack.Navigator>
+        <Stack.Screen name='Despesas' component={BottomTabScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='GerenciarDespesa' component={GerenciarDespesas} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  headerActions: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
   },
 });

@@ -1,12 +1,11 @@
-import { View, StyleSheet, useColorScheme } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import DespesaSaida from '../components/despesa/DespesaSaida';
 import { useExpenses } from '../store/expenses-context';
-import { themes } from '../constants/theme';
+import { useAppTheme } from '../store/theme-context';
 
 function DespesasRecentes() {
   const { expenses } = useExpenses();
-  const scheme = useColorScheme();
-  const colors = themes[scheme === 'dark' ? 'dark' : 'light'];
+  const { colors } = useAppTheme();
 
   const today = new Date();
   const sevenDaysAgo = new Date();

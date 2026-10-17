@@ -50,7 +50,7 @@ export function ExpensesContextProvider({ children }) {
   const deleteExpense = (id) => dispatch({ type: 'DELETE', payload: id });
 
   useEffect(() => {
-    async function loadExpenses() {
+    async function load() {
       try {
         const json = await AsyncStorage.getItem(STORAGE_KEY);
         if (json) {
@@ -66,7 +66,7 @@ export function ExpensesContextProvider({ children }) {
         setIsLoaded(true);
       }
     }
-    loadExpenses();
+    load();
   }, []);
 
   useEffect(() => {
@@ -87,9 +87,9 @@ export function ExpensesContextProvider({ children }) {
  * Atalho para usar o contexto em qualquer tela.
  */
 export function useExpenses() {
-  const context = useContext(ExpensesContext);
-  if (!context) {
+  const ctx = useContext(ExpensesContext);
+  if (!ctx) {
     throw new Error('Faltou o ExpensesContextProvider');
   }
-  return context;
+  return ctx;
 }
