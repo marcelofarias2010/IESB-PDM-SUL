@@ -11,10 +11,13 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useState, useLayoutEffect, useEffect } from 'react';
+import { useContext, useState, useLayoutEffect, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useExpenses } from '../store/expenses-context';
+import { addDoc, collection, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useAppTheme } from '../store/theme-context';
+import { db } from '../src/firebaseConnection';
+import { AuthContext } from '../src/auth-contexto';
+import { toDate } from '../src/mapExpense';
 
 const CATEGORIES = ['Alimentação', 'Transporte', 'Material', 'Outros'];
 
@@ -42,17 +45,16 @@ function validate(values) {
 }
 
 function GerenciarDespesas({ route, navigation }) {
+  const { uid } = useContext(AuthContext);
   const expenseId = route.params?.expenseId;
   const isEditing = !!expenseId;
-  const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses();
   const { colors } = useAppTheme();
-  const selected = expenses.find((e) => e.id === expenseId);
 
   const [form, setForm] = useState({
-    description: selected?.description ?? '',
-    amount: selected ? String(selected.amount) : '',
-    date: selected?.date ?? new Date(),
-    category: selected?.category ?? '',
+    description: '',
+    amount: '',
+    date: new Date(),
+    category: '',
   });
   const [errors, setErrors] = useState({});
   const [showPicker, setShowPicker] = useState(false);
@@ -65,17 +67,27 @@ function GerenciarDespesas({ route, navigation }) {
   }, [navigation, isEditing]);
 
   useEffect(() => {
-    if (!selected) return;
-    setForm({
-      description: selected.description ?? '',
-      amount: String(selected.amount ?? ''),
-      date:
-        selected.date instanceof Date
-          ? selected.date
-          : new Date(selected.date),
-      category: selected.category ?? '',
-    });
-  }, [selected]);
+    if (!expenseId || !uid) return undefined;
+
+    /**
+     * Carrega a despesa do Firestore para preencher o formulário de edição.
+     */
+    async function loadExpense() {
+      const snapshot = await getDoc(doc(db, uid, expenseId));
+      if (!snapshot.exists()) return;
+
+      const data = snapshot.data();
+      setForm({
+        description: data.description ?? '',
+        amount: String(data.amount ?? ''),
+        date: toDate(data.date),
+        category: data.category ?? '',
+      });
+    }
+
+    loadExpense();
+    return undefined;
+  }, [expenseId, uid]);
 
   /**
    * Atualiza um campo do formulário e limpa o erro desse campo.
@@ -122,26 +134,34 @@ function GerenciarDespesas({ route, navigation }) {
   }
 
   /**
-   * Valida e salva (criação ou edição).
+   * Valida e salva a despesa no Firestore (criação ou edição).
    */
-  function handleSubmit() {
+  async function handleSubmit() {
     const found = validate(form);
     setErrors(found);
     if (Object.keys(found).length > 0) return;
 
-    const amount = Number(String(form.amount).replace(',', '.'));
-    const data = { ...form, amount };
+    const payload = {
+      description: form.description.trim(),
+      amount: Number(String(form.amount).replace(',', '.')),
+      date: form.date,
+      category: form.category,
+    };
 
-    if (isEditing) {
-      updateExpense(expenseId, data);
-    } else {
-      addExpense(data);
+    try {
+      if (isEditing) {
+        await updateDoc(doc(db, uid, expenseId), payload);
+      } else {
+        await addDoc(collection(db, uid), payload);
+      }
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível salvar a despesa.');
     }
-    navigation.goBack();
   }
 
   /**
-   * Pede confirmação antes de excluir a despesa.
+   * Pede confirmação e remove a despesa do Firestore.
    */
   function confirmDelete() {
     Alert.alert(
@@ -152,9 +172,13 @@ function GerenciarDespesas({ route, navigation }) {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: () => {
-            deleteExpense(expenseId);
-            navigation.goBack();
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(db, uid, expenseId));
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível excluir a despesa.');
+            }
           },
         },
       ]

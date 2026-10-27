@@ -1,24 +1,37 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useContext, useEffect } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
+import { collection, onSnapshot } from 'firebase/firestore';
 import DespesaSaida from '../components/despesa/DespesaSaida';
-import { useExpenses } from '../store/expenses-context';
 import { useDebounce } from '../hooks/useDebounce';
 import { useAppTheme } from '../store/theme-context';
+import { db } from '../src/firebaseConnection';
+import { AuthContext } from '../src/auth-contexto';
+import { mapExpenseDocument } from '../src/mapExpense';
 
 function TodasDespesas() {
-  const { expenses } = useExpenses();
+  const { uid } = useContext(AuthContext);
+  const [despesas, setDespesas] = useState([]);
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 400);
-
   const { colors } = useAppTheme();
 
   const filtered = useMemo(() => {
     const term = debouncedQuery.trim().toLowerCase();
-    if (!term) return expenses;
-    return expenses.filter((e) =>
-      e.description.toLowerCase().includes(term)
+    if (!term) return despesas;
+    return despesas.filter((expense) =>
+      expense.description.toLowerCase().includes(term)
     );
-  }, [expenses, debouncedQuery]);
+  }, [despesas, debouncedQuery]);
+
+  useEffect(() => {
+    if (!uid) return undefined;
+
+    const unsubscribe = onSnapshot(collection(db, uid), (snapshot) => {
+      setDespesas(snapshot.docs.map(mapExpenseDocument));
+    });
+
+    return () => unsubscribe();
+  }, [uid]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
