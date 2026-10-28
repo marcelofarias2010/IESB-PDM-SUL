@@ -21,8 +21,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-community/datetimepicker",
-      "@react-native-firebase/app"
+      "@react-native-community/datetimepicker"
     ]
   }
 }

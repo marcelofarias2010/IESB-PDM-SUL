@@ -10,7 +10,6 @@ import IconButton from './components/IconButton';
 import { useNavigation } from '@react-navigation/native';
 import { ExpensesContextProvider } from './store/expenses-context';
 import { ThemeProvider, useAppTheme } from './store/theme-context';
-import AuthProvider from './src/auth-contexto';
 
 
 export default function App() {
@@ -89,12 +88,10 @@ function RootNavigation() {
         },
       }}
     >
-      <AuthProvider>
-        <Stack.Navigator>
-          <Stack.Screen name='Despesas' component={BottomTabScreen} options={{ headerShown: false }} />
-          <Stack.Screen name='GerenciarDespesa' component={GerenciarDespesas} />
-        </Stack.Navigator>
-      </AuthProvider>
+      <Stack.Navigator>
+        <Stack.Screen name='Despesas' component={BottomTabScreen} options={{ headerShown: false }} />
+        <Stack.Screen name='GerenciarDespesa' component={GerenciarDespesas} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
